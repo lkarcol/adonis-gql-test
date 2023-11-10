@@ -4,7 +4,7 @@ import { Readable } from 'node:stream'
 import { ApolloServer, type BaseContext, HeaderMap } from '@apollo/server'
 
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import type { ContextFn } from '@ioc:Zakodium/Apollo/Server'
+import type { ContextFn } from '@ioc:Apollo/Server'
 
 export async function graphqlAdonis<ContextType extends BaseContext = BaseContext>(
   apolloServer: ApolloServer<ContextType>,

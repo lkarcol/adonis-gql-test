@@ -6,10 +6,10 @@ import {
 
 import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import type { LoggerContract } from '@ioc:Adonis/Core/Logger'
-import type { ApolloConfig, ContextFn } from '@ioc:Zakodium/Apollo/Server'
+import type { ApolloConfig, ContextFn } from '@ioc:Apollo/Server'
 
 import { graphqlAdonis } from './graphqlAdonis'
+import Schema from './Schema'
 
 const defaultContextFn: ContextFn = () => ({})
 
@@ -21,48 +21,39 @@ export default class ApolloServer<ContextType extends BaseContext = BaseContext>
 
   private $path: string
 
-  constructor(
-    application: ApplicationContract,
-    config: ApolloConfig<ContextType>
-    //logger: LoggerContract
-  ) {
-    const {
-      path: graphQLPath = '/graphql',
-      schemas,
-      apolloServer = {},
-      apolloProductionLandingPageOptions,
-      apolloLocalLandingPageOptions,
-      context = defaultContextFn as ContextFn<ContextType>,
-      executableSchema = {},
-    } = config
+  constructor(application: ApplicationContract, config: ApolloConfig<ContextType>) {
+    this.init(application, config)
+  }
 
+  public async init(application: ApplicationContract, config: ApolloConfig<ContextType>) {
     this.$app = application
+    this.$path = config.path ?? '/graphql'
+    this.$contextFunction = config.context ?? (defaultContextFn as ContextFn<ContextType>)
 
-    this.$path = graphQLPath
+    const schema = await Schema.make(config)
+    this.makeApolloServer(schema, config)
+  }
 
-    this.$contextFunction = context
-
-    if (application.inDev) {
-      //printWarnings(warnings, logger)
-    }
-
+  private makeApolloServer(schema, config: ApolloConfig<ContextType>) {
     this.$apolloServer = new ApolloServerBase<ContextType>({
-      schema: schemas,
+      ...schema,
       plugins: [
         this.$app.env.get('NODE_ENV') === 'production'
           ? // eslint-disable-next-line new-cap
             ApolloServerPluginLandingPageProductionDefault({
               footer: false,
-              ...apolloProductionLandingPageOptions,
+              ...config.apolloProductionLandingPageOptions,
             })
           : // eslint-disable-next-line new-cap
             ApolloServerPluginLandingPageLocalDefault({
               footer: false,
-              ...apolloLocalLandingPageOptions,
+              ...config.apolloLocalLandingPageOptions,
             }),
       ],
-      ...apolloServer,
+      ...config.apolloServer,
     })
+
+    this.$apolloServer.start()
   }
 
   public applyMiddleware(): void {

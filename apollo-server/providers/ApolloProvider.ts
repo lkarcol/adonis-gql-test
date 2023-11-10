@@ -1,8 +1,6 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import { ApolloConfig } from '@ioc:Zakodium/Apollo/Server'
-
 import ApolloServer from '../src/ApolloServer'
-import ApolloTypeGraphql from '../src/ApolloTypeGraphql'
+import { ApolloConfig } from '@ioc:Apollo/Server'
 
 export default class ApolloProvider {
   protected loading = false
@@ -10,35 +8,28 @@ export default class ApolloProvider {
   constructor(protected app: ApplicationContract) {}
 
   public register(): void {
-    this.app.container.singleton('ApolloTypeGraphql', () => {
+    this.app.container.singleton('Apollo/Server', () => {
       if (this.loading) {
         throw new Error(
           'ApolloProvider was called during its initialization. To use this provider in resolvers, use dynamic `import()`.'
         )
       }
-      //     let apolloConfig = this.app.config.get('apollo', {}) as ApolloConfig
-      //   const appUrl = this.app.env.get('APP_URL') as string
-      /* if (!apolloConfig.appUrl && appUrl) {
-        apolloConfig = {
-          ...apolloConfig,
-          appUrl,
-        }
-      }*/
+      let apolloConfig = this.app.config.get('apollo', {}) as ApolloConfig
 
       this.loading = true
-      return new ApolloTypeGraphql()
+      return new ApolloServer(this.app, apolloConfig)
     })
   }
 
   public async boot(): Promise<void> {
-    const service = this.app.container.resolveBinding('ApolloTypeGraphql')
+    /*  const service = this.app.container.resolveBinding('ApolloTypeGraphql')
 
     const AuthResolver = (await import('App/Resolvers/AuthResolver')).default
     const UserResolver = (await import('App/Resolvers/UserResolver')).default
     const PostResolver = (await import('App/Resolvers/PostResolver')).default
     const resolvers = [AuthResolver, UserResolver, PostResolver]
     await service.makeSchemaFromTypeGraphqlResolvers(this.app, resolvers)
-    service.start()
+    service.start()*/
   }
 
   public async ready() {}

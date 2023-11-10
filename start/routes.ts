@@ -19,10 +19,10 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
-import ApolloTypeGraphql from '@ioc:ApolloTypeGraphql'
+import ApolloServer from '@ioc:Apollo/Server'
 
 Route.get('/', async () => {
   return { hello: 'world' }
 })
 
-ApolloTypeGraphql.createGraphqlEndpoint()
+ApolloServer.applyMiddleware()
