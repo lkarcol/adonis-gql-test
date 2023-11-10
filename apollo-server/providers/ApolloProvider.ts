@@ -21,20 +21,9 @@ export default class ApolloProvider {
     })
   }
 
-  public async boot(): Promise<void> {
-    /*  const service = this.app.container.resolveBinding('ApolloTypeGraphql')
-
-    const AuthResolver = (await import('App/Resolvers/AuthResolver')).default
-    const UserResolver = (await import('App/Resolvers/UserResolver')).default
-    const PostResolver = (await import('App/Resolvers/PostResolver')).default
-    const resolvers = [AuthResolver, UserResolver, PostResolver]
-    await service.makeSchemaFromTypeGraphqlResolvers(this.app, resolvers)
-    service.start()*/
-  }
+  public async boot(): Promise<void> {}
 
   public async ready() {}
 
-  public async shutdown(): Promise<void> {
-    // await this.app.container.resolveBinding('Zakodium/Apollo/Server').stop()
-  }
+  public async shutdown(): Promise<void> { }
 }
