@@ -1,6 +1,6 @@
 declare module '@ioc:Apollo/Server' {
   import { AuthChecker } from 'type-graphql'
-  import { Middleware } from 'type-graphql/build/typings/typings/Middleware'  
+  import { Middleware } from 'type-graphql/build/typings/typings/Middleware'
   import type { ApolloServerOptions, BaseContext, ContextFunction } from '@apollo/server'
   import {
     ApolloServerPluginLandingPageLocalDefaultOptions,

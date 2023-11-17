@@ -25,5 +25,5 @@ export default class ApolloProvider {
 
   public async ready() {}
 
-  public async shutdown(): Promise<void> { }
+  public async shutdown(): Promise<void> {}
 }

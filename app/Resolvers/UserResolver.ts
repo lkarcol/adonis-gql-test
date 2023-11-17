@@ -4,6 +4,7 @@ import User, { UserPlan } from '../Models/User'
 import UserGql from '../GqlModels/UserGql'
 import Post from '../Models/Post'
 import CurrentUser from 'App/Decorators/UserCtx'
+import GetDataloader, { DataloaderType, DataloderService } from 'App/Decorators/Dataloder'
 
 @Resolver(() => UserGql)
 export default class UserResolver {
@@ -29,8 +30,24 @@ export default class UserResolver {
   }
 
   @FieldResolver()
-  public async posts(@Root() user: User) {
-    const posts = await Post.query().where('userId', user.id)
-    return posts
+  public async email(@Root() user: User) {
+    return user.email
+  }
+
+  // 1 + N problem
+  @FieldResolver()
+  public async posts2(@Root() user: User) {
+    return await Post.query().where('userId', user.id)
+  }
+
+  // 1 + N  solved by dataloder
+  @FieldResolver()
+  public async posts(@Root() user: User, @GetDataloader('posts') loader: DataloderService) {
+    const batchFn = async (keys: number[]) => {
+      const posts = await Post.query().whereIn('userId', keys).orderBy('createdAt', 'desc')
+      return keys.map((key) => posts.filter((p) => p.userId === key))
+    }
+
+    return await loader.getDataloder(batchFn).load(user.id)
   }
 }

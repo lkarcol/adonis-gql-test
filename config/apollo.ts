@@ -14,7 +14,10 @@ import { GqlSessionActivator } from 'App/Middleware/GqlSession'
 
 export default {
   resolvers: join(__dirname, '../app/Resolvers'),
-  context: ({ ctx }) => ctx,
+  context: ({ ctx }) => {
+    ctx.dataloader = null
+    return ctx
+  },
   typeGraphql: {
     authChecker: AuthGuard,
     globalMiddlewares: [GqlSessionActivator],

@@ -23,6 +23,9 @@ class User {
 
   @Field(() => [Post])
   public posts: Post[]
+
+  @Field(() => [Post])
+  public posts2: Post[]
 }
 
 export default User

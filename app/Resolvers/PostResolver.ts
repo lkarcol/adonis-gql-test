@@ -13,17 +13,19 @@ import User from '../Models/User'
 import UserGql from '../GqlModels/UserGql'
 
 import PostGql from '../GqlModels/PostGql'
-import { CreatePostInput, DeletePostInput } from '../Inputs/PostInput'
+import { CreatePostInput, DeletePostInput, createPostInputValidation } from '../Inputs/PostInput'
 import CurrentUser from '../Decorators/UserCtx'
 import Post from '../Models/Post'
 import { Role } from 'App/Inputs/UserInput'
 import { PostGuard } from 'App/Decorators/PostGuard'
+import { ValidateInput } from 'App/Decorators/Validator'
+import GetDataloader, { DataloderService } from 'App/Decorators/Dataloder'
 
 @Resolver(() => PostGql)
 export default class UserResolver {
   @Authorized()
   @Mutation(() => PostGql)
-  @UseMiddleware(PostGuard)
+  @ValidateInput(createPostInputValidation)
   public async createPost(@Arg('data') postData: CreatePostInput, @CurrentUser() user: User) {
     const post = await user.related('posts').create({
       ...postData,
@@ -47,7 +49,12 @@ export default class UserResolver {
   }
 
   @FieldResolver(() => UserGql)
-  public async author(@Root() post: Post) {
-    return await User.findBy('id', post.userId)
+  public async author(@Root() post: Post, @GetDataloader('authors') loader: DataloderService) {
+    const batchFn = async (keys: number[]) => {
+      const users = await User.query().whereIn('id', keys)
+      return keys.map((key) => users.filter((p) => p.id === key)).flat()
+    }
+
+    return await loader.getDataloder(batchFn).load(post.userId)
   }
 }
